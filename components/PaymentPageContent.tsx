@@ -40,6 +40,7 @@ export default function PaymentPage() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
+          <div className="text-sm font-semibold tracking-wider text-[#0066cc] mb-2">CAH INVESTMENT PLATFORM</div>
           <h1 className="text-3xl md:text-4xl font-bold text-[#003366] mb-2">
             Complete Your Investment
           </h1>

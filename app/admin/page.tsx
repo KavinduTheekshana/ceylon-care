@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase, type InvestmentData } from '@/lib/supabase';
 import { isAuthenticated, clearAuthSession } from '@/lib/auth';
 import AdminLogin from '@/components/AdminLogin';
+import DocumentManager from '@/components/DocumentManager';
 
 export default function AdminPanel() {
   const [isAuth, setIsAuth] = useState(false);
@@ -148,7 +149,8 @@ export default function AdminPanel() {
         <div className="bg-gradient-to-r from-[#003366] to-[#0066cc] text-white p-6 rounded-t-lg">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Ceylon Care - Admin Panel</h1>
+              <div className="text-xs font-semibold tracking-wider mb-1 opacity-90">CAH INVESTMENT PLATFORM</div>
+              <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
               <p className="text-blue-100">Manage investment batch applications in real-time</p>
             </div>
             <button
@@ -274,6 +276,11 @@ export default function AdminPanel() {
             <li>• All changes update in real-time on the main website</li>
             <li>• Keep this page open to see live updates from other admins</li>
           </ul>
+        </div>
+
+        {/* Document Management Section */}
+        <div className="mt-6">
+          <DocumentManager />
         </div>
 
         {/* Back to Site */}

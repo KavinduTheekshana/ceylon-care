@@ -1,39 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase, type InvestmentDetails } from '@/lib/supabase';
+import { supabase, type InvestmentDetails, type InvestmentData } from '@/lib/supabase';
 
 export default function InvestmentDetailsSection() {
   const [details, setDetails] = useState<InvestmentDetails | null>(null);
+  const [livePrice, setLivePrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDetails();
-
-    // Subscribe to real-time updates
-    const channel = supabase
-      .channel('investment-details-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'investment_details',
-          filter: 'is_active=eq.true',
-        },
-        (payload) => {
-          console.log('Investment details updated:', payload);
-          if (payload.new) {
-            setDetails(payload.new as InvestmentDetails);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   const fetchDetails = async () => {
     try {
@@ -59,6 +32,77 @@ export default function InvestmentDetailsSection() {
       setLoading(false);
     }
   };
+
+  const fetchLivePrice = async () => {
+    try {
+      console.log('Fetching live price...');
+      const { data, error } = await supabase
+        .from('investment_batches')
+        .select('current_price')
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        console.error('Live price error:', error);
+        throw error;
+      }
+
+      console.log('Live price loaded:', data);
+      setLivePrice(data.current_price);
+    } catch (error) {
+      console.error('Error fetching live price:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetails();
+    fetchLivePrice();
+
+    // Subscribe to investment_details updates
+    const detailsChannel = supabase
+      .channel('investment-details-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'investment_details',
+          filter: 'is_active=eq.true',
+        },
+        (payload) => {
+          console.log('Investment details updated:', payload);
+          if (payload.new) {
+            setDetails(payload.new as InvestmentDetails);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to investment_batches updates for live price
+    const livePriceChannel = supabase
+      .channel('live-price-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'investment_batches',
+          filter: 'is_active=eq.true',
+        },
+        (payload) => {
+          console.log('Live price updated:', payload);
+          if (payload.new) {
+            setLivePrice((payload.new as InvestmentData).current_price);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(detailsChannel);
+      supabase.removeChannel(livePriceChannel);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -101,6 +145,12 @@ export default function InvestmentDetailsSection() {
     }).replace(',', ' @');
   };
 
+  // Use live price if available, fallback to current_share_price
+  const effectivePrice = livePrice ?? details.current_share_price;
+
+  // Calculate minimum investment amount dynamically using live price
+  const calculatedMinimumAmount = details.minimum_to_qualify * effectivePrice;
+
   return (
     <section id="investment" className="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg">
       <h2 className="text-2xl font-bold text-[#003366] border-l-4 border-[#003366] pl-3 mb-4">
@@ -112,7 +162,7 @@ export default function InvestmentDetailsSection() {
           {formatNumber(details.total_micro_shares)} ({details.total_micro_shares.toLocaleString()})
         </li>
         <li>
-          <strong>Current Price:</strong> £{details.current_share_price.toFixed(2)} |{' '}
+          <strong>Current Price:</strong> £{effectivePrice.toFixed(2)} |{' '}
           <strong>Post-Launch Price:</strong> £{details.post_launch_price.toFixed(2)}
         </li>
         <li>
@@ -133,7 +183,7 @@ export default function InvestmentDetailsSection() {
         href="/payment"
         className="inline-block px-6 py-3 bg-[#0066cc] text-white rounded-lg font-bold hover:bg-[#004c99] transition-colors shadow-lg hover:shadow-xl"
       >
-        Buy {formatNumber(details.minimum_to_qualify)} Shares (£{details.minimum_investment_amount.toFixed(2)}) & Secure Your Position
+        Buy {formatNumber(details.minimum_to_qualify)} Shares (£{calculatedMinimumAmount.toFixed(2)}) & Secure Your Position
       </a>
     </section>
   );

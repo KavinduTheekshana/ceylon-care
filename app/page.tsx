@@ -1,11 +1,13 @@
 import LiveEntryDemand from '@/components/LiveEntryDemand';
 import InvestmentDetailsSection from '@/components/InvestmentDetails';
+import DocumentsSection from '@/components/DocumentsSection';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-gradient-to-br from-[#003366] to-[#0066cc] text-white py-10 px-5 text-center">
+        <div className="text-sm font-semibold tracking-wider mb-2">CAH INVESTMENT PLATFORM</div>
         <h1 className="text-3xl md:text-4xl font-bold mb-3">
           Ceylon Care Ltd – NHS Pilot & Job Sponsorship Programme 2025
         </h1>
@@ -40,6 +42,9 @@ export default function Home() {
 
       {/* Live Entry Demand - Dynamic Section */}
       <LiveEntryDemand />
+
+      {/* Documents Section */}
+      <DocumentsSection />
 
       {/* Employment Section */}
       <section id="jobs" className="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg">

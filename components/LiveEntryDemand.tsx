@@ -96,7 +96,7 @@ export default function LiveEntryDemand() {
       {/* Stats Display */}
       <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
         <div className="text-center">
-          <p className="text-gray-600 text-sm mb-1">Secured Applicants</p>
+          <p className="text-gray-600 text-sm mb-1">Applicants</p>
           <p className="text-[#003366] text-3xl font-bold">{data.secured_applicants}</p>
         </div>
         <div className="text-center">

@@ -37,6 +37,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="bg-gradient-to-r from-[#003366] to-[#0066cc] text-white inline-block px-6 py-3 rounded-lg mb-4">
+            <div className="text-xs font-semibold tracking-wider mb-1 opacity-90">CAH INVESTMENT PLATFORM</div>
             <h1 className="text-2xl font-bold">Ceylon Care Ltd</h1>
           </div>
           <p className="text-gray-600">Admin Panel Login</p>

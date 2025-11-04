@@ -31,3 +31,16 @@ export type InvestmentDetails = {
   is_active: boolean;
   last_updated: string;
 };
+
+export type Document = {
+  id: number;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_name: string;
+  file_size: number | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
