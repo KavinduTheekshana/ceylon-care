@@ -7,6 +7,9 @@ export default function LiveEntryDemand() {
   const [data, setData] = useState<InvestmentData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Static current price value
+  const STATIC_CURRENT_PRICE = 1.00; // 1 GBP
+
   useEffect(() => {
     // Fetch initial data
     fetchInvestmentData();
@@ -105,7 +108,7 @@ export default function LiveEntryDemand() {
         </div>
         <div className="text-center">
           <p className="text-gray-600 text-sm mb-1">Live Price</p>
-          <p className="text-[#003366] text-3xl font-bold">£{data.current_price.toFixed(2)}</p>
+          <p className="text-[#003366] text-3xl font-bold">£{STATIC_CURRENT_PRICE.toFixed(2)}</p>
         </div>
       </div>
 

@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase, type InvestmentDetails, type InvestmentData } from '@/lib/supabase';
+import { supabase, type InvestmentDetails } from '@/lib/supabase';
 
 export default function InvestmentDetailsSection() {
   const [details, setDetails] = useState<InvestmentDetails | null>(null);
-  const [livePrice, setLivePrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Static current price value
+  const STATIC_CURRENT_PRICE = 1.00; // 1 GBP
 
   const fetchDetails = async () => {
     try {
@@ -33,30 +35,9 @@ export default function InvestmentDetailsSection() {
     }
   };
 
-  const fetchLivePrice = async () => {
-    try {
-      console.log('Fetching live price...');
-      const { data, error } = await supabase
-        .from('investment_batches')
-        .select('current_price')
-        .eq('is_active', true)
-        .single();
-
-      if (error) {
-        console.error('Live price error:', error);
-        throw error;
-      }
-
-      console.log('Live price loaded:', data);
-      setLivePrice(data.current_price);
-    } catch (error) {
-      console.error('Error fetching live price:', error);
-    }
-  };
 
   useEffect(() => {
     fetchDetails();
-    fetchLivePrice();
 
     // Subscribe to investment_details updates
     const detailsChannel = supabase
@@ -78,29 +59,8 @@ export default function InvestmentDetailsSection() {
       )
       .subscribe();
 
-    // Subscribe to investment_batches updates for live price
-    const livePriceChannel = supabase
-      .channel('live-price-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'investment_batches',
-          filter: 'is_active=eq.true',
-        },
-        (payload) => {
-          console.log('Live price updated:', payload);
-          if (payload.new) {
-            setLivePrice((payload.new as InvestmentData).current_price);
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       supabase.removeChannel(detailsChannel);
-      supabase.removeChannel(livePriceChannel);
     };
   }, []);
 
@@ -145,8 +105,8 @@ export default function InvestmentDetailsSection() {
     }).replace(',', ' @');
   };
 
-  // Use live price if available, fallback to current_share_price
-  const effectivePrice = livePrice ?? details.current_share_price;
+  // Use static current price
+  const effectivePrice = STATIC_CURRENT_PRICE;
 
   // Calculate minimum investment amount dynamically using live price
   const calculatedMinimumAmount = details.minimum_to_qualify * effectivePrice;
